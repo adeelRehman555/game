@@ -231,25 +231,36 @@ export default function GameScreen({ onGameOver }) {
     
     setTimeout(() => setGameText("Hearts collect karo, dangers se bacho! ❤️💔🥀💝"), 3000);
     
-    // Spawn items - adjusted for harder difficulty
+    // Spawn items - balanced spawn rates
     itemSpawnRef.current = setInterval(() => {
       // Randomly decide what to spawn
       const random = Math.random();
-      if (random < 0.27) { // 27% chance for heart (+1 score)
+      if (random < 0.42) { // 42% chance for heart (+1 score) - increased so she can score
         spawnItem();
-      } else if (random < 0.62) { // 35% chance for broken heart (-2 score) - increased by 10%
+      } else if (random < 0.70) { // 28% chance for broken heart (-2 score)
         spawnObstacle('broken');
-      } else if (random < 0.92) { // 30% chance for rose (-1 life) - increased by 10%
+      } else if (random < 0.92) { // 22% chance for rose (-1 life)
         spawnObstacle('rose');
-      } else { // 8% chance for life gain (+1 life) - decreased by 20%
+      } else { // 8% chance for life gain (+1 life)
         spawnPowerup('life');
       }
     }, 1400);
 
-    // Random funny score deductions - cheating to make her lose!
+    // Random funny score deductions - increases with score to give false hope!
     scoreDeductRef.current = setInterval(() => {
-      // 25% chance to deduct score (happens occasionally)
-      if (Math.random() < 0.25) {
+      const currentScore = scoreRef.current;
+      
+      // Calculate deduction probability based on score - starts easy, gets brutal!
+      let deductionChance = 0.05; // 5% at start (very low)
+      
+      if (currentScore >= 30) deductionChance = 0.12; // 12% after score 30
+      if (currentScore >= 50) deductionChance = 0.30; // 30% after score 50 - gets harder!
+      if (currentScore >= 60) deductionChance = 0.45; // 45% after score 60 - much harder!
+      if (currentScore >= 70) deductionChance = 0.60; // 60% after score 70 - very hard!
+      if (currentScore >= 80) deductionChance = 0.75; // 75% after score 80 - brutal!
+      if (currentScore >= 90) deductionChance = 0.85; // 85% after score 90 - almost impossible!
+      
+      if (Math.random() < deductionChance) {
         const deduction = cheatingTexts[Math.floor(Math.random() * cheatingTexts.length)];
         setScore(prev => Math.max(0, prev - deduction.amount));
         setGameText(deduction.text);
@@ -259,7 +270,7 @@ export default function GameScreen({ onGameOver }) {
           console.log('Sound error:', e);
         }
       }
-    }, 8000); // Every 8 seconds
+    }, 7000); // Every 7 seconds
 
     // Increase speed over time
     speedIncreaseRef.current = setInterval(() => {
@@ -296,7 +307,7 @@ export default function GameScreen({ onGameOver }) {
       setGameText("Game Over Aniba! 😢");
       setTimeout(() => onGameOver(score), 500);
     }
-    if (score >= 200) {
+    if (score >= 100) {
       clearInterval(gameLoopRef.current);
       clearInterval(itemSpawnRef.current);
       clearInterval(scoreDeductRef.current);
