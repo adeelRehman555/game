@@ -3,11 +3,15 @@ import { useEffect, useState } from 'react';
 
 export default function GameOverScreen({ score, onPlayAgain }) {
   const [showConfetti, setShowConfetti] = useState(false);
-  const isWin = score >= 100;
+  const isWin = score >= 200;
 
   useEffect(() => {
     if (isWin) {
       setShowConfetti(true);
+      
+      // Optional: Add a timeout to stop confetti after some time
+      const timeout = setTimeout(() => setShowConfetti(false), 5000);
+      return () => clearTimeout(timeout);
     }
   }, [isWin]);
 
@@ -15,7 +19,7 @@ export default function GameOverScreen({ score, onPlayAgain }) {
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-y-auto">
       {/* Confetti effect for winning */}
       {showConfetti && (
-        <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {[...Array(50)].map((_, i) => (
             <div
               key={i}
@@ -24,10 +28,13 @@ export default function GameOverScreen({ score, onPlayAgain }) {
                 left: `${Math.random() * 100}%`,
                 top: `-20px`,
                 animationDelay: `${Math.random() * 2}s`,
-                fontSize: '24px'
+                animationDuration: `${2 + Math.random() * 3}s`,
+                fontSize: '24px',
+                opacity: Math.random() * 0.8 + 0.2,
+                transform: `rotate(${Math.random() * 360}deg)`
               }}
             >
-              {['❤️', '💕', '💖', '💝', '🌹'][Math.floor(Math.random() * 5)]}
+              {['❤️', '💕', '💖', '💝', '🌹', '💘', '💓'][Math.floor(Math.random() * 7)]}
             </div>
           ))}
         </div>
@@ -44,7 +51,7 @@ export default function GameOverScreen({ score, onPlayAgain }) {
               Wow Aniba! Tum Jeet Gai! 😱
             </h1>
             <p className="text-2xl md:text-4xl font-bold text-pink-600 mb-6">
-              Score: {score}/100 ✨
+              Score: {score}/200 ✨
             </p>
             <div className="bg-green-50 p-6 rounded-xl border-2 border-green-200 mb-6">
               <p className="text-lg md:text-2xl text-gray-700 mb-2">
@@ -65,7 +72,7 @@ export default function GameOverScreen({ score, onPlayAgain }) {
               Game Over Aniba! 😄
             </h1>
             <p className="text-2xl md:text-4xl font-bold text-red-600 mb-6">
-              Score: {score}/100
+              Score: {score}/200
             </p>
             <div className="bg-pink-50 p-6 rounded-xl border-2 border-pink-300 mb-6">
               <p className="text-lg md:text-2xl text-gray-700 mb-3 font-bold">
@@ -75,7 +82,7 @@ export default function GameOverScreen({ score, onPlayAgain }) {
                 Ab toh meri Valentine banna padega 😍
               </p>
               <p className="text-sm md:text-lg text-gray-500 italic">
-                "100 bohot mushkil hai Aniba, dil dena aasaan hai" 💕
+                "200 bohot mushkil hai Aniba, dil dena aasaan hai" 💕
               </p>
             </div>
 
@@ -86,7 +93,7 @@ export default function GameOverScreen({ score, onPlayAgain }) {
                 {score >= 30 && score < 50 && "Acha try tha, lekin kaafi nahi 😏"}
                 {score >= 50 && score < 70 && "Qareeb pahanch gai, par nahi! 😉"}
                 {score >= 70 && score < 90 && "Bohot close! Maar khao dobara 💪"}
-                {score >= 90 && score < 100 && "Oh no! Sirf thora sa reh gaya! Phir try karo 🎯"}
+                {score >= 90 && score < 200 && "Oh no! Sirf thora sa reh gaya! Phir try karo 🎯"}
               </p>
             </div>
           </>

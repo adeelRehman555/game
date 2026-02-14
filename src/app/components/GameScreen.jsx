@@ -3,9 +3,9 @@ import { useState, useEffect, useRef } from 'react';
 
 export default function GameScreen({ onGameOver }) {
   const [score, setScore] = useState(0);
-  const [lives, setLives] = useState(3);
-  const [gameSpeed, setGameSpeed] = useState(1.5);
-  const [playerPos, setPlayerPos] = useState({ x: 20, y: 50 }); // percentage based
+  const [lives, setLives] = useState(5);
+  const [gameSpeed, setGameSpeed] = useState(1.8);
+  const [playerPos, setPlayerPos] = useState({ x: 20, y: 50 });
   const [facingRight, setFacingRight] = useState(true);
   const [items, setItems] = useState([]);
   const [obstacles, setObstacles] = useState([]);
@@ -20,11 +20,17 @@ export default function GameScreen({ onGameOver }) {
   const scoreDeductRef = useRef(null);
   const speedIncreaseRef = useRef(null);
   const movementIntervalRef = useRef(null);
+  const scoreRef = useRef(score); // Add ref for score
   const playerPosRef = useRef(playerPos);
   const itemsRef = useRef(items);
   const obstaclesRef = useRef(obstacles);
   const powerupsRef = useRef(powerups);
-  const activePowerupRef = useRef(activePowerup);
+
+  // Keep score ref in sync
+  useEffect(() => {
+    scoreRef.current = score;
+  }, [score]);
+  const gameContainerRef = useRef(null);
 
   // Keep refs in sync with state
   useEffect(() => {
@@ -42,34 +48,6 @@ export default function GameScreen({ onGameOver }) {
   useEffect(() => {
     powerupsRef.current = powerups;
   }, [powerups]);
-
-  useEffect(() => {
-    activePowerupRef.current = activePowerup;
-  }, [activePowerup]);
-
-  // Funny score deduction texts
-  const deductionTexts = [
-    { text: "-5 Aniba kyunke tum bahut khubsurat lag rahi ho 😍", amount: 5 },
-    { text: "-10 Aniba wo smile dekh ke focus kho gaya 😊", amount: 10 },
-    { text: "-5 Aniba tumhari aankhein bahut pyari hain 💕", amount: 5 },
-    { text: "-10 Aniba tumhare paas hoon toh concentrate nahi ho pata 😘", amount: 10 },
-    { text: "-5 Aniba tum ne blink kiya 😜", amount: 5 },
-    { text: "-10 Aniba... bas kyunke 🤭", amount: 10 },
-    { text: "-5 Aniba zidd karne pe 😤", amount: 5 },
-    { text: "-10 kyunke maine kaha Aniba 😏", amount: 10 },
-    { text: "-5 Aniba itni cutu si ho 🥰", amount: 5 },
-    { text: "-10 Aniba dimples dikhe 😍", amount: 10 },
-    { text: "-5 Aniba bahut smart ho 🤓", amount: 5 },
-    { text: "-10 Aniba mera dil churaya tumne 💝", amount: 10 },
-    { text: "-5 Aniba hasna mana hai 😆", amount: 5 },
-    { text: "-10 Aniba tum perfect ho ✨", amount: 10 },
-    { text: "-5 Aniba meri favorite ho 💗", amount: 5 },
-    { text: "-8 Aniba aaj bohot pyari lag rahi ho 🌹", amount: 8 },
-    { text: "-7 Aniba tumhari awaaz yaad aa gayi 🎵", amount: 7 },
-    { text: "-10 Aniba cheating kar raha hoon kyunke pyar hai 😇", amount: 10 },
-    { text: "-5 Aniba tumne hans diya ab kaise jeetu? 😂", amount: 5 },
-    { text: "-10 Aniba sochna band karo, dil sun lo 💖", amount: 10 },
-  ];
 
   // Roman Urdu game texts
   const gameTexts = [
@@ -99,14 +77,71 @@ export default function GameScreen({ onGameOver }) {
     "Score badh raha hai Aniba! 📈",
   ];
 
+  // Deduction texts for broken hearts
+  const deductionTexts = [
+    "Arre Aniba! Broken heart ❤️‍🩹 -2",
+    "Oho! Yeh toh toda! 💔 -2",
+    "Aniba bacho! Broken heart! 😢 -2",
+    "Nahi Aniba! Yeh accha nahi hai 💔 -2",
+    "Sorry Aniba! Score kam ho gaya 📉 -2",
+  ];
+
+  // Funny cheating score deductions - MANY reasons to make winning very hard!
+  const cheatingTexts = [
+    { text: "Aniba tum bohot khubsurat lag rahi ho -5 😍", amount: 5 },
+    { text: "Aniba wo smile dekh ke focus kho gaya -10 😊", amount: 10 },
+    { text: "Aniba tumhari aankhein bahut pyari hain -5 💕", amount: 5 },
+    { text: "Aniba tumhare paas hoon toh concentrate nahi ho pata -10 😘", amount: 10 },
+    { text: "Aniba tum ne blink kiya -5 😜", amount: 5 },
+    { text: "Aniba... bas kyunke -10 🤭", amount: 10 },
+    { text: "Aniba zidd karne pe -5 😤", amount: 5 },
+    { text: "Kyunke maine kaha Aniba -10 😏", amount: 10 },
+    { text: "Aniba itni cute si ho -5 🥰", amount: 5 },
+    { text: "Aniba dimples dikhe -10 😍", amount: 10 },
+    { text: "Aniba bahut smart ho -5 🤓", amount: 5 },
+    { text: "Aniba mera dil churaya tumne -10 💝", amount: 10 },
+    { text: "Aniba hasna mana hai -5 😆", amount: 5 },
+    { text: "Aniba tum perfect ho -10 ✨", amount: 10 },
+    { text: "Aniba meri favorite ho -5 💗", amount: 5 },
+    { text: "Aniba aaj bohot pyari lag rahi ho -8 🌹", amount: 8 },
+    { text: "Aniba tumhari awaaz yaad aa gayi -7 🎵", amount: 7 },
+    { text: "Aniba cheating kar raha hoon kyunke pyar hai -10 😇", amount: 10 },
+    { text: "Aniba tumne hans diya ab kaise jeetu? -5 😂", amount: 5 },
+    { text: "Aniba sochna band karo, dil sun lo -10 💖", amount: 10 },
+    { text: "Aniba tum itni adorable ho -7 💞", amount: 7 },
+    { text: "Aniba birthday yaad aa gaya -10 🎂", amount: 10 },
+    { text: "Aniba tumse baat karke khush ho gaya -5 😊", amount: 5 },
+    { text: "Aniba muskurahat dekh li -8 ☺️", amount: 8 },
+    { text: "Aniba tumhara naam soch liya -5 👌", amount: 5 },
+    { text: "Aniba focus nahi kar pa raha -10 😵", amount: 10 },
+    { text: "Aniba bohot miss kar raha hoon -7 🥰", amount: 7 },
+    { text: "Aniba tumhari baatein yaad aa gayi -5 💬", amount: 5 },
+    { text: "Aniba pyar ho gaya na -10 😍", amount: 10 },
+    { text: "Aniba game haar jao please -10 😂", amount: 10 },
+  ];
+
+  // Life loss texts
+  const lifeLossTexts = [
+    "Aniba! Life gayi! 🥀 -1 Life",
+    "Oho! Bahut bura! 💔 -1 Life",
+    "Bacho Aniba! Life kam ho gayi! 😱",
+    "Nahi! Yeh accha nahi hua 🌹 -1 Life",
+  ];
+
+  // Life gain texts
+  const lifeGainTexts = [
+    "Wah Aniba! Extra Life! 💝 +1 Life",
+    "Kamaal kar diya! Extra Life mil gayi! ✨",
+    "Shabash! Life badh gayi! 💫",
+    "Bohat khoob! Extra Life! 🌟",
+  ];
+
   // Play sound effect
   const playSound = (type) => {
     if (isMuted) return;
     
     try {
-      const audio = new Audio();
       if (type === 'collect') {
-        // Simple beep sound using Web Audio API
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
@@ -127,6 +162,17 @@ export default function GameScreen({ onGameOver }) {
         gainNode.gain.value = 0.2;
         oscillator.start();
         oscillator.stop(audioContext.currentTime + 0.2);
+      } else if (type === 'life') {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        oscillator.frequency.value = 600;
+        oscillator.type = 'sine';
+        gainNode.gain.value = 0.15;
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.15);
       }
     } catch (e) {
       console.log('Audio not supported');
@@ -174,50 +220,61 @@ export default function GameScreen({ onGameOver }) {
       if (keysPressed['arrowdown'] || keysPressed['s']) movePlayer('down');
       if (keysPressed['arrowleft'] || keysPressed['a']) movePlayer('left');
       if (keysPressed['arrowright'] || keysPressed['d']) movePlayer('right');
-    }, 25);
+    }, 20);
 
     return () => clearInterval(movementIntervalRef.current);
-  }, [keysPressed, activePowerup]);
+  }, [keysPressed]);
 
   // Initialize game
   useEffect(() => {
     setGameText("Chalo Aniba game start ho gai! 🎮");
     
-    // Show helpful tips at start
-    setTimeout(() => setGameText("Hearts collect karo Aniba! ❤️"), 3000);
-    setTimeout(() => setGameText("Obstacles se bacho Aniba! ⚠️"), 6000);
+    setTimeout(() => setGameText("Hearts collect karo, dangers se bacho! ❤️💔🥀💝"), 3000);
     
-    // Spawn items periodically
+    // Spawn items - adjusted for harder difficulty
     itemSpawnRef.current = setInterval(() => {
-      spawnItem();
-      spawnObstacle(); // Obstacles from start!
-      if (Math.random() < 0.12) spawnPowerup(); // 12% chance
-    }, 1800);
+      // Randomly decide what to spawn
+      const random = Math.random();
+      if (random < 0.27) { // 27% chance for heart (+1 score)
+        spawnItem();
+      } else if (random < 0.62) { // 35% chance for broken heart (-2 score) - increased by 10%
+        spawnObstacle('broken');
+      } else if (random < 0.92) { // 30% chance for rose (-1 life) - increased by 10%
+        spawnObstacle('rose');
+      } else { // 8% chance for life gain (+1 life) - decreased by 20%
+        spawnPowerup('life');
+      }
+    }, 1400);
 
-    // Random score deductions
+    // Random funny score deductions - cheating to make her lose!
     scoreDeductRef.current = setInterval(() => {
-      if (score > 10 && Math.random() < 0.35) { // 35% chance when score > 10
-        const deduction = deductionTexts[Math.floor(Math.random() * deductionTexts.length)];
+      // 25% chance to deduct score (happens occasionally)
+      if (Math.random() < 0.25) {
+        const deduction = cheatingTexts[Math.floor(Math.random() * cheatingTexts.length)];
         setScore(prev => Math.max(0, prev - deduction.amount));
         setGameText(deduction.text);
-        playSound('hit');
+        try {
+          playSound('hit');
+        } catch(e) {
+          console.log('Sound error:', e);
+        }
       }
-    }, 8000);
+    }, 8000); // Every 8 seconds
 
-    // Increase speed over time - balanced progression
+    // Increase speed over time
     speedIncreaseRef.current = setInterval(() => {
       setGameSpeed(prev => {
-        const newSpeed = Math.min(prev + 0.3, 5);
-        if (newSpeed < 4.8) setGameText("Speed badh gai Aniba! Sambhal ke! 🚀");
+        const newSpeed = Math.min(prev + 0.15, 3.2);
+        if (newSpeed > prev) setGameText("Speed badh gai! Sambhal ke Aniba! 🚀");
         return newSpeed;
       });
-    }, 15000);
+    }, 18000);
 
-    // Game loop - 30ms for smooth 33fps performance
+    // Game loop - check collisions frequently
     gameLoopRef.current = setInterval(() => {
       updateGame();
       checkCollisions();
-    }, 30);
+    }, 50);
 
     return () => {
       clearInterval(itemSpawnRef.current);
@@ -236,27 +293,22 @@ export default function GameScreen({ onGameOver }) {
       clearInterval(scoreDeductRef.current);
       clearInterval(speedIncreaseRef.current);
       clearInterval(movementIntervalRef.current);
+      setGameText("Game Over Aniba! 😢");
       setTimeout(() => onGameOver(score), 500);
     }
-    if (score >= 100) {
+    if (score >= 200) {
       clearInterval(gameLoopRef.current);
       clearInterval(itemSpawnRef.current);
       clearInterval(scoreDeductRef.current);
       clearInterval(speedIncreaseRef.current);
       clearInterval(movementIntervalRef.current);
+      setGameText("You Win Aniba! 🎉");
       setTimeout(() => onGameOver(score), 500);
     }
   }, [lives, score]);
 
   const spawnItem = () => {
-    const newY = Math.random() * 75 + 12; // Random Y position
-    
-    // Check if there's already something too close at this Y position
-    const tooClose = [...items, ...obstacles, ...powerups].some(existing => {
-      return Math.abs(existing.y - newY) < 15 && existing.x > 80; // Check if within 15 units vertically and still on screen
-    });
-    
-    if (tooClose) return; // Skip spawning if too close to another item
+    const newY = Math.random() * 80 + 10;
     
     const newItem = {
       id: Math.random(),
@@ -267,225 +319,217 @@ export default function GameScreen({ onGameOver }) {
     setItems(prev => [...prev, newItem]);
   };
 
-  const spawnObstacle = () => {
-    const newY = Math.random() * 75 + 12; // Random Y position
+  const spawnObstacle = (type) => {
+    const newY = Math.random() * 80 + 10;
     
-    // Check if there's already something too close at this Y position
-    const tooClose = [...items, ...obstacles, ...powerups].some(existing => {
-      return Math.abs(existing.y - newY) < 15 && existing.x > 80; // Check if within 15 units vertically and still on screen
-    });
-    
-    if (tooClose) return; // Skip spawning if too close to another item
-    
-    const types = [
-      { type: 'rose', damage: 'life' },      // 🥀 Takes 1 life
-      { type: 'broken', damage: 'score' }    // 💔 Takes 2 score
-    ];
-    const selectedType = types[Math.floor(Math.random() * types.length)];
     const newObstacle = {
       id: Math.random(),
       x: 100,
       y: newY,
-      type: selectedType.type,
-      damage: selectedType.damage
+      type: type // 'broken' or 'rose'
     };
     setObstacles(prev => [...prev, newObstacle]);
   };
 
-  const spawnPowerup = () => {
-    const newY = Math.random() * 75 + 12; // Random Y position
+  const spawnPowerup = (type) => {
+    const newY = Math.random() * 80 + 10;
     
-    // Check if there's already something too close at this Y position
-    const tooClose = [...items, ...obstacles, ...powerups].some(existing => {
-      return Math.abs(existing.y - newY) < 15 && existing.x > 80; // Check if within 15 units vertically and still on screen
-    });
-    
-    if (tooClose) return; // Skip spawning if too close to another item
-    
-    const types = ['shield', 'speed', 'magnet', 'life'];
     const newPowerup = {
       id: Math.random(),
       x: 100,
       y: newY,
-      type: types[Math.floor(Math.random() * types.length)]
+      type: type // 'life'
     };
     setPowerups(prev => [...prev, newPowerup]);
   };
 
   const updateGame = () => {
-    // Move items
+    // Move items left
     setItems(prev => prev
       .map(item => ({ ...item, x: item.x - gameSpeed }))
       .filter(item => item.x > -10)
     );
-
-    // Move obstacles
+    
+    // Move obstacles left
     setObstacles(prev => prev
-      .map(obs => ({ ...obs, x: obs.x - gameSpeed }))
-      .filter(obs => obs.x > -10)
+      .map(obstacle => ({ ...obstacle, x: obstacle.x - gameSpeed }))
+      .filter(obstacle => obstacle.x > -10)
     );
-
-    // Move powerups
+    
+    // Move powerups left
     setPowerups(prev => prev
-      .map(pow => ({ ...pow, x: pow.x - gameSpeed }))
-      .filter(pow => pow.x > -10)
+      .map(powerup => ({ ...powerup, x: powerup.x - gameSpeed }))
+      .filter(powerup => powerup.x > -10)
     );
   };
 
   const checkCollisions = () => {
-    // EQUAL range for ALL emojis - consistent across entire screen
-    const collisionRange = 10;
-    const magnetRange = 25; // Magnet pulls hearts from farther away
+    if (!gameContainerRef.current) return;
     
-    // Track what we've already processed this frame to prevent double hits
-    const processedItems = new Set();
-    const processedObstacles = new Set();
-    const processedPowerups = new Set();
-
-    // Check heart collection - ONE heart per frame max (unless magnet is active)
+    // Get the actual character element
+    const characterElement = document.querySelector('.character-image');
+    if (!characterElement) return;
+    
+    // Get character's actual position and dimensions
+    const characterRect = characterElement.getBoundingClientRect();
+    
+    // Check hearts collisions (+1 score each)
     setItems(prev => {
-      const remaining = [];
-      let heartCollected = false;
-      const useRange = activePowerup === 'magnet' ? magnetRange : collisionRange;
+      const remainingItems = [];
+      let collectedHearts = 0;
       
       for (const item of prev) {
-        if (processedItems.has(item.id)) {
-          remaining.push(item);
-          continue;
-        }
+        const heartElement = document.querySelector(`[data-heart-id="${item.id}"]`);
         
-        const xDiff = Math.abs(item.x - playerPos.x);
-        const yDiff = Math.abs(item.y - playerPos.y);
-        
-        // Check if touching (within range in BOTH X and Y)
-        if (xDiff <= useRange && yDiff <= useRange && !heartCollected) {
-          setScore(s => s + 1); // +1 score per heart
-          playSound('collect');
-          const randomText = gameTexts[Math.floor(Math.random() * gameTexts.length)];
-          setGameText(randomText);
-          processedItems.add(item.id);
-          heartCollected = true;
-          // DON'T add to remaining - it's collected!
+        if (heartElement) {
+          const heartRect = heartElement.getBoundingClientRect();
+          
+          const overlap = !(
+            characterRect.right < heartRect.left ||
+            characterRect.left > heartRect.right ||
+            characterRect.bottom < heartRect.top ||
+            characterRect.top > heartRect.bottom
+          );
+          
+          if (overlap) {
+            // Heart collected - increase counter
+            collectedHearts++;
+            playSound('collect');
+            const randomText = gameTexts[Math.floor(Math.random() * gameTexts.length)];
+            setGameText(randomText);
+          } else {
+            remainingItems.push(item);
+          }
         } else {
-          remaining.push(item);
+          remainingItems.push(item);
         }
       }
-      return remaining;
-    });
-
-    // Check obstacle collision - ONE obstacle per frame max
-    if (activePowerup !== 'shield') {
-      setObstacles(prev => {
-        const remaining = [];
-        let obstacleHit = false;
-        
-        for (const obs of prev) {
-          if (obstacleHit || processedObstacles.has(obs.id)) {
-            remaining.push(obs);
-            continue;
-          }
-          
-          const xDiff = Math.abs(obs.x - playerPos.x);
-          const yDiff = Math.abs(obs.y - playerPos.y);
-          
-          // Check if touching (within range in BOTH X and Y)
-          if (xDiff <= collisionRange && yDiff <= collisionRange) {
-            // Apply damage based on obstacle type
-            if (obs.damage === 'life') {
-              // Flower takes -1 life ONLY
-              setLives(l => {
-                const newLives = l - 1;
-                return Math.max(0, newLives);
-              });
-              setGameText("🥀 Aniba phool ke kante lag gaye! -1 Life! 💔");
-            } else if (obs.damage === 'score') {
-              // Broken heart takes -2 score ONLY
-              setScore(s => {
-                const newScore = s - 2;
-                return Math.max(0, newScore);
-              });
-              setGameText("💔 Aniba broken heart! -2 Score! 😢");
-            }
-            playSound('hit');
-            processedObstacles.add(obs.id);
-            obstacleHit = true;
-            // DON'T add to remaining - it hit us!
-          } else {
-            remaining.push(obs);
-          }
-        }
-        return remaining;
-      });
-    } else {
-      // Shield active - just remove obstacles that go off screen
-      setObstacles(prev => prev.filter(obs => obs.x > -10));
-    }
-
-    // Check powerup collection - ONE powerup per frame max
-    setPowerups(prev => {
-      const remaining = [];
-      let powerupCollected = false;
       
-      for (const pow of prev) {
-        if (powerupCollected || processedPowerups.has(pow.id)) {
-          remaining.push(pow);
-          continue;
-        }
+      // Add +1 score for EACH heart collected
+      if (collectedHearts > 0) {
+        setScore(s => s + collectedHearts);
+      }
+      
+      return remainingItems;
+    });
+    
+    // Check obstacles collisions
+    setObstacles(prev => {
+      const remainingObstacles = [];
+      let brokenHeartsHit = 0;
+      let rosesHit = 0;
+      
+      for (const obstacle of prev) {
+        const obstacleElement = document.querySelector(`[data-obstacle-id="${obstacle.id}"]`);
         
-        const xDiff = Math.abs(pow.x - playerPos.x);
-        const yDiff = Math.abs(pow.y - playerPos.y);
-        
-        // Check if touching (within range in BOTH X and Y)
-        if (xDiff <= collisionRange && yDiff <= collisionRange) {
-          if (pow.type === 'life') {
-            // Light gives +1 life ONLY
-            setLives(l => {
-              const newLives = l + 1;
-              return Math.min(5, newLives);
-            });
-            setGameText("💡 Aniba light mil gayi! +1 Life! 🎉");
-            playSound('collect');
-          } else {
-            setActivePowerup(pow.type);
-            playSound('collect');
-            if (pow.type === 'shield') {
-              setGameText("💫 Aniba shield mil gaya! 5 seconds safe! ✨");
-            } else if (pow.type === 'speed') {
-              setGameText("⚡ Aniba speed boost! 3 seconds fast! 🚀");
-            } else if (pow.type === 'magnet') {
-              setGameText("🧲 Aniba magnet mil gaya! 3 seconds auto-collect! 💫");
+        if (obstacleElement) {
+          const obstacleRect = obstacleElement.getBoundingClientRect();
+          
+          const overlap = !(
+            characterRect.right < obstacleRect.left ||
+            characterRect.left > obstacleRect.right ||
+            characterRect.bottom < obstacleRect.top ||
+            characterRect.top > obstacleRect.bottom
+          );
+          
+          if (overlap) {
+            playSound('hit');
+            if (obstacle.type === 'broken') {
+              // Broken heart hit - increase counter for -2 each
+              brokenHeartsHit++;
+              const randomText = deductionTexts[Math.floor(Math.random() * deductionTexts.length)];
+              setGameText(randomText);
+            } else if (obstacle.type === 'rose') {
+              // Rose hit - increase counter for -1 life each
+              rosesHit++;
+              const randomText = lifeLossTexts[Math.floor(Math.random() * lifeLossTexts.length)];
+              setGameText(randomText);
             }
-            setTimeout(() => setActivePowerup(null), pow.type === 'speed' || pow.type === 'magnet' ? 3000 : 5000);
+          } else {
+            remainingObstacles.push(obstacle);
           }
-          processedPowerups.add(pow.id);
-          powerupCollected = true;
-          // DON'T add to remaining - it's collected!
         } else {
-          remaining.push(pow);
+          remainingObstacles.push(obstacle);
         }
       }
-      return remaining;
+      
+      // Apply broken heart penalties (-2 each)
+      if (brokenHeartsHit > 0) {
+        setScore(s => Math.max(0, s - (brokenHeartsHit * 2)));
+      }
+      
+      // Apply rose penalties (-1 life each)
+      if (rosesHit > 0) {
+        setLives(l => Math.max(0, l - rosesHit));
+      }
+      
+      return remainingObstacles;
+    });
+    
+    // Check powerups collisions
+    setPowerups(prev => {
+      const remainingPowerups = [];
+      let lifeGiftsCollected = 0;
+      
+      for (const powerup of prev) {
+        const powerupElement = document.querySelector(`[data-powerup-id="${powerup.id}"]`);
+        
+        if (powerupElement) {
+          const powerupRect = powerupElement.getBoundingClientRect();
+          
+          const overlap = !(
+            characterRect.right < powerupRect.left ||
+            characterRect.left > powerupRect.right ||
+            characterRect.bottom < powerupRect.top ||
+            characterRect.top > powerupRect.bottom
+          );
+          
+          if (overlap) {
+            playSound('life');
+            if (powerup.type === 'life') {
+              // Life gift collected - increase counter for +1 life each
+              lifeGiftsCollected++;
+              const randomText = lifeGainTexts[Math.floor(Math.random() * lifeGainTexts.length)];
+              setGameText(randomText);
+            }
+          } else {
+            remainingPowerups.push(powerup);
+          }
+        } else {
+          remainingPowerups.push(powerup);
+        }
+      }
+      
+      // Apply life gain (+1 life each, max 5 lives)
+      if (lifeGiftsCollected > 0) {
+        setLives(l => {
+          const newLives = l + lifeGiftsCollected;
+          return Math.min(5, newLives); // Cap at 5 lives maximum
+        });
+      }
+      
+      return remainingPowerups;
     });
   };
 
   const movePlayer = (direction) => {
     setPlayerPos(prev => {
       let newPos = { ...prev };
-      const moveSpeed = activePowerup === 'speed' ? 5 : 3;
+      const moveSpeed = 2.5;
 
       switch(direction) {
         case 'up':
-          newPos.y = Math.max(5, prev.y - moveSpeed);
+          newPos.y = Math.max(8, prev.y - moveSpeed);
           break;
         case 'down':
-          newPos.y = Math.min(90, prev.y + moveSpeed);
+          newPos.y = Math.min(92, prev.y + moveSpeed);
           break;
         case 'left':
           newPos.x = Math.max(5, prev.x - moveSpeed);
           setFacingRight(false);
           break;
         case 'right':
-          newPos.x = Math.min(40, prev.x + moveSpeed);
+          newPos.x = Math.min(35, prev.x + moveSpeed);
           setFacingRight(true);
           break;
       }
@@ -493,34 +537,19 @@ export default function GameScreen({ onGameOver }) {
     });
   };
 
-  const getObstacleEmoji = (type) => {
-    switch(type) {
-      case 'rose': return '🥀'; // Takes 1 life
-      case 'broken': return '💔'; // Takes 2 score
-      default: return '💔';
-    }
-  };
-
-  const getPowerupEmoji = (type) => {
-    switch(type) {
-      case 'shield': return '💫';
-      case 'speed': return '⚡';
-      case 'magnet': return '🧲';
-      case 'life': return '💡';
-      default: return '✨';
-    }
-  };
-
   return (
-    <div className="fixed inset-0 bg-gradient-to-r from-pink-200 via-purple-200 to-red-200 overflow-hidden game-container">
+    <div 
+      ref={gameContainerRef}
+      className="fixed inset-0 bg-gradient-to-r from-pink-200 via-purple-200 to-red-200 overflow-hidden game-container"
+    >
       {/* Game Info Bar */}
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-2 md:p-3 flex justify-between items-center z-20">
         <div className="flex items-center gap-2 md:gap-4">
           <div className="text-lg md:text-xl lg:text-2xl font-bold">
-            Score: {score}/100
+            Score: {score}/200
           </div>
           <div className="flex gap-1">
-            {[...Array(Math.max(0, lives || 0))].map((_, i) => (
+            {[...Array(Math.max(0, lives))].map((_, i) => (
               <span key={i} className="text-xl md:text-2xl">❤️</span>
             ))}
           </div>
@@ -541,18 +570,11 @@ export default function GameScreen({ onGameOver }) {
         </div>
       )}
 
-      {/* Active Powerup Indicator */}
-      {activePowerup && (
-        <div className="absolute top-12 md:top-16 right-2 md:right-4 bg-yellow-400 text-black px-2 md:px-4 py-1 md:py-2 rounded-full text-xs md:text-base font-bold z-20 animate-pulse">
-          {getPowerupEmoji(activePowerup)} Active!
-        </div>
-      )}
-
       {/* Game Area */}
       <div className="relative w-full h-full">
         {/* Player Character */}
         <div
-          className="absolute transition-all duration-100"
+          className="absolute"
           style={{
             left: `${playerPos.x}%`,
             top: `${playerPos.y}%`,
@@ -563,71 +585,77 @@ export default function GameScreen({ onGameOver }) {
           <img
             src={facingRight ? '/char2.png' : '/char1.png'}
             alt="character"
-            className={`w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain ${activePowerup === 'shield' ? 'ring-4 ring-blue-400 rounded-full' : ''}`}
+            className="character-image w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 object-contain"
           />
         </div>
 
-        {/* Hearts */}
+        {/* Hearts (+1 score each) */}
         {items.map(item => (
           <div
             key={item.id}
-            className="absolute text-4xl sm:text-5xl md:text-6xl lg:text-7xl"
+            data-heart-id={item.id}
+            className="absolute text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
             style={{
               left: `${item.x}%`,
               top: `${item.y}%`,
-              transform: 'translate(-50%, -50%)'
+              transform: 'translate(-50%, -50%)',
+              zIndex: 5
             }}
           >
             ❤️
           </div>
         ))}
 
-        {/* Obstacles */}
-        {obstacles.map(obs => (
+        {/* Obstacles - Broken Hearts (-2 score each) and Roses (-1 life each) */}
+        {obstacles.map(obstacle => (
           <div
-            key={obs.id}
+            key={obstacle.id}
+            data-obstacle-id={obstacle.id}
             className="absolute text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
             style={{
-              left: `${obs.x}%`,
-              top: `${obs.y}%`,
-              transform: 'translate(-50%, -50%)'
+              left: `${obstacle.x}%`,
+              top: `${obstacle.y}%`,
+              transform: 'translate(-50%, -50%)',
+              zIndex: 5
             }}
           >
-            {getObstacleEmoji(obs.type)}
+            {obstacle.type === 'broken' ? '💔' : '🥀'}
           </div>
         ))}
 
-        {/* Powerups */}
-        {powerups.map(pow => (
+        {/* Powerups - Life Gain (+1 life each) */}
+        {powerups.map(powerup => (
           <div
-            key={pow.id}
-            className="absolute text-3xl sm:text-4xl md:text-5xl lg:text-6xl animate-spin"
+            key={powerup.id}
+            data-powerup-id={powerup.id}
+            className="absolute text-3xl sm:text-4xl md:text-5xl lg:text-6xl"
             style={{
-              left: `${pow.x}%`,
-              top: `${pow.y}%`,
-              transform: 'translate(-50%, -50%)'
+              left: `${powerup.x}%`,
+              top: `${powerup.y}%`,
+              transform: 'translate(-50%, -50%)',
+              zIndex: 5
             }}
           >
-            {getPowerupEmoji(pow.type)}
+            💝
           </div>
         ))}
       </div>
 
-      {/* Controls - Always visible but can use keyboard too */}
+      {/* Controls */}
       <div className="absolute bottom-4 left-0 right-0 flex justify-between px-4 z-20">
         {/* Left Controls - Up/Down */}
         <div className="flex flex-col gap-2">
           <button
             onTouchStart={() => movePlayer('up')}
             onMouseDown={() => movePlayer('up')}
-            className="bg-white/90 hover:bg-white w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-xl shadow-xl font-bold text-2xl md:text-3xl active:scale-95 transition-transform border-2 border-pink-300"
+            className="bg-white/90 hover:bg-white w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-xl shadow-xl font-bold text-xl md:text-2xl active:scale-95 transition-transform border-2 border-pink-300"
           >
             ⬆️
           </button>
           <button
             onTouchStart={() => movePlayer('down')}
             onMouseDown={() => movePlayer('down')}
-            className="bg-white/90 hover:bg-white w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-xl shadow-xl font-bold text-2xl md:text-3xl active:scale-95 transition-transform border-2 border-pink-300"
+            className="bg-white/90 hover:bg-white w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-xl shadow-xl font-bold text-xl md:text-2xl active:scale-95 transition-transform border-2 border-pink-300"
           >
             ⬇️
           </button>
@@ -638,14 +666,14 @@ export default function GameScreen({ onGameOver }) {
           <button
             onTouchStart={() => movePlayer('left')}
             onMouseDown={() => movePlayer('left')}
-            className="bg-white/90 hover:bg-white w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-xl shadow-xl font-bold text-2xl md:text-3xl active:scale-95 transition-transform border-2 border-pink-300"
+            className="bg-white/90 hover:bg-white w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-xl shadow-xl font-bold text-xl md:text-2xl active:scale-95 transition-transform border-2 border-pink-300"
           >
             ⬅️
           </button>
           <button
             onTouchStart={() => movePlayer('right')}
             onMouseDown={() => movePlayer('right')}
-            className="bg-white/90 hover:bg-white w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-xl shadow-xl font-bold text-2xl md:text-3xl active:scale-95 transition-transform border-2 border-pink-300"
+            className="bg-white/90 hover:bg-white w-14 h-14 md:w-16 md:h-16 lg:w-20 lg:h-20 rounded-xl shadow-xl font-bold text-xl md:text-2xl active:scale-95 transition-transform border-2 border-pink-300"
           >
             ➡️
           </button>
@@ -654,7 +682,7 @@ export default function GameScreen({ onGameOver }) {
 
       {/* Desktop hint */}
       {!isMobile && (
-        <div className="absolute bottom-32 md:bottom-36 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-full text-xs sm:text-sm z-20">
+        <div className="absolute bottom-28 md:bottom-32 left-1/2 transform -translate-x-1/2 bg-black/60 text-white px-4 py-2 rounded-full text-xs sm:text-sm z-20">
           Use Arrow Keys or WASD to move
         </div>
       )}
