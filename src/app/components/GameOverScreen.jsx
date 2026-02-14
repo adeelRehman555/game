@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 
 export default function GameOverScreen({ score, onPlayAgain }) {
   const [showConfetti, setShowConfetti] = useState(false);
-  const isWin = score >= 200;
+  const isWin = score >= 100;
 
   useEffect(() => {
     if (isWin) {

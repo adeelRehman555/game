@@ -26,7 +26,7 @@ export default function InstructionScreen({ onStart }) {
           <div className="bg-pink-50 p-3 rounded-xl border-2 border-pink-200">
             <h3 className="font-bold text-base md:text-lg mb-1 text-pink-700">🎯 Goal:</h3>
             <p className="text-xs sm:text-sm md:text-base">
-              Collect <span className="font-bold text-red-600">200 hearts ❤️</span> to prove you don't want to be my Valentine 😏
+              Collect <span className="font-bold text-red-600">100 hearts ❤️</span> to prove you don't want to be my Valentine 😏
             </p>
           </div>
 

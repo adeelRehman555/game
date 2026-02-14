@@ -557,7 +557,7 @@ export default function GameScreen({ onGameOver }) {
       <div className="absolute top-0 left-0 right-0 bg-black/50 text-white p-2 md:p-3 flex justify-between items-center z-20">
         <div className="flex items-center gap-2 md:gap-4">
           <div className="text-lg md:text-xl lg:text-2xl font-bold">
-            Score: {score}/200
+            Score: {score}/100
           </div>
           <div className="flex gap-1">
             {[...Array(Math.max(0, lives))].map((_, i) => (
